@@ -8,8 +8,8 @@ use Illuminate\Auth\Access\Response;
 
 class PostPolicy
 {
-    public function modify(User $user, Post $post): Response
+    public function modify(User $user, Post $post): bool
     {
-        return $user->id === $post->user_id ? Response::deny("You do not own this post") : Response::allow();
+        return $user->id === $post->user_id;
     }
 }
