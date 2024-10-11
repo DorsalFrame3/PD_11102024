@@ -82,8 +82,8 @@ window.onload = function() {
                 posts.forEach(post => {
                     postsContainer.innerHTML = `
                         <div class="post">
-                            <p>Title: ${data.title}</p>
-                            <p>Body: ${data.body}</p>
+                            <p>Title: ${post.title}</p>
+                            <p>Body: ${post.body}</p>
                         </div>
                     `;
                 });
