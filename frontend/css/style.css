@@ -38,6 +38,7 @@ h1 {
 }
 
 .container input[type="text"],
+.container input[type="password"],
 .container textarea,
 .container input[type="submit"] {
     width: 100%;
@@ -65,4 +66,8 @@ h1 {
 /* Hover effect for submit button */
 .container input[type="submit"]:hover {
     background-color: #45a049;
+}
+
+.hidden {
+    display: none;
 }

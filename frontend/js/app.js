@@ -1,13 +1,93 @@
 window.onload = function() {
+    // Handle showing registration or login form
+    document.getElementById('register-button').onclick = function() {
+        document.querySelector('.login').classList.add('hidden');
+        document.querySelector('.register').classList.remove('hidden');
+        document.querySelector('.registered').classList.add('hidden');
+    };
+
+    document.getElementById('login-button').onclick = function() {
+        document.querySelector('.register').classList.add('hidden');
+        document.querySelector('.login').classList.remove('hidden');
+        document.querySelector('.registered').classList.add('hidden');
+    };
+
+    // Handle Registration
+    document.getElementById('submit-registration').onclick = async function() {
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const passwordConfirmation = document.getElementById('password_confirmation').value;
+
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: name,
+                    email: email,
+                    password: password,
+                    password_confirmation: passwordConfirmation
+                })
+            });
+
+            if (response.ok) {
+                alert("Registration successful! You can now log in.");
+                document.querySelector('.register').classList.add('hidden');
+            } else {
+                const errorData = await response.json();
+                alert(`Registration failed: ${errorData.message}`);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    // Handle Login
+    document.getElementById('submit-login').onclick = async function() {
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Store token in localStorage or sessionStorage
+                localStorage.setItem('token', data.token);
+                document.querySelector('.login').classList.add('hidden');
+                document.querySelector('.registered').classList.remove('hidden');
+                document.getElementById('user-data').innerHTML = `<p>User Email: ${data.user.email}<br>
+                                                                  User Name: ${data.user.name}</p>`;
+                await fetchAllPosts(data.token);
+            } else {
+                alert(`Login failed: ${data.message}`);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     const getForm = document.getElementById('get-user-form');
     getForm.addEventListener('submit', async function(event) {
         event.preventDefault();
 
-        let formData = new FormData(event.target);
-        let token = formData.get('token');
+        let token = localStorage.getItem('token'); // Use token from storage
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/user', {
+            const response = await fetch('http://127.0.0.1:8000/api/user-data', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -24,7 +104,7 @@ window.onload = function() {
             }
 
         } catch (error) {
-           console.log(error);
+            console.log(error);
         }
     });
 
@@ -33,7 +113,7 @@ window.onload = function() {
         event.preventDefault();
 
         let formData = new FormData(event.target);
-        let token = formData.get('token');
+        let token = localStorage.getItem('token'); // Use token from storage
 
         try {
             const response = await fetch('http://127.0.0.1:8000/api/posts', {
@@ -80,21 +160,21 @@ window.onload = function() {
                 const postsContainer = document.getElementById('user-posts');
                 postsContainer.innerHTML = '';
                 posts.forEach(post => {
-                    postsContainer.innerHTML = `
+                    postsContainer.innerHTML += `
                         <div class="post">
-                            <p>Title: ${post.title}</p>
-                            <p>Body: ${post.body}</p>
+                            <p><strong>Title:</strong> ${post.title}</p>
+                            <p><strong>Body:</strong> ${post.body}</p>
                         </div>
                     `;
                 });
-            
             }
         } catch (error) {
             console.log(error);
         }
     }
 
-    const token = document.getElementById('token').value;
+    // Check for a token on page load
+    const token = localStorage.getItem('token');
     if (token) {
         fetchAllPosts(token);
     }
